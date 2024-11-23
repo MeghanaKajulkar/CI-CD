@@ -76,5 +76,23 @@ pipeline {
                 }
             }
         }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    echo 'Deploying to Kubernetes...'
+
+                    // Extract namespace using PowerShell
+                    def namespace = powershell(returnStdout: true, script: """
+                        (Get-Content ${DEPLOYMENT_FILE} | Select-String -Pattern 'namespace:').Line.Split(':')[1].Trim()
+                    """).trim()
+
+                    // Apply the deployment file
+                    bat "kubectl apply -f ${DEPLOYMENT_FILE}"
+
+                    // Verify the deployment in the extracted namespace
+                    bat "kubectl get pods --namespace=${namespace}"
+                }
+            }
+        }
     }
 }
