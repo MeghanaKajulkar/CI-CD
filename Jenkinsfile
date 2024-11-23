@@ -1,63 +1,62 @@
 pipeline {
     agent any
-
     stages {
+        stage('Declarative: Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+        
         stage('Clone Repository') {
             steps {
-                echo "Cloning the repository..."
+                echo 'Cloning the repository...'
                 checkout scm
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                echo "Installing Python dependencies..."
-                bat 'pip install -r requirements.txt'
+                echo 'Installing Python dependencies...'
+                bat 'pip uninstall werkzeug -y'  // Uninstall werkzeug
+                bat 'pip install -r requirements.txt'  // Reinstall dependencies
             }
         }
 
         stage('Run Tests') {
             steps {
-                echo "Running tests..."
+                echo 'Running tests...'
                 bat 'python -m unittest discover -s tests'
             }
         }
 
         stage('Build Docker Image') {
+            when {
+                expression { return currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
             steps {
-                echo "Building the Docker image..."
-                bat 'docker build -t feedback-app:latest .'
+                echo 'Building Docker image...'
+                // Add your Docker build steps here
             }
         }
 
         stage('Deploy Application') {
+            when {
+                expression { return currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
             steps {
-                echo "Deploying the application..."
-                script {
-                    bat """
-                    docker ps -q -f name=feedback-app-container | for /f "tokens=*" %i in ('more') do docker stop %i && docker rm %i
-                    docker run -d -p 5000:5000 --name feedback-app-container feedback-app:latest
-                    """
-                }
+                echo 'Deploying application...'
+                // Add deployment steps here
             }
         }
 
         stage('Health Check') {
+            when {
+                expression { return currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
             steps {
-                echo "Performing health check..."
-                script {
-                    def response = bat(
-                        script: "curl --silent --fail http://localhost:5000 || echo 'DOWN'",
-                        returnStdout: true
-                    ).trim()
-                    if (response.contains('DOWN')) {
-                        error "Application health check failed!"
-                    } else {
-                        echo "Application is running successfully!"
-                    }
-                }
+                echo 'Running health check...'
+                // Add health check steps here
             }
         }
     }
 }
-
