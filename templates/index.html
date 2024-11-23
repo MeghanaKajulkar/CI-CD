@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Feedback</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Employee Feedback</h1>
+    <form action="/add_feedback" method="POST">
+        <input type="text" name="name" placeholder="Your Name" required>
+        <textarea name="message" placeholder="Your Feedback" required></textarea>
+        <button type="submit">Submit Feedback</button>
+    </form>
+    <h2>Feedback:</h2>
+    <ul>
+        {% for fb in feedback %}
+            <li><strong>{{ fb.name }}</strong>: {{ fb.message }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
