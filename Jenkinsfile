@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = "meghanamk24/feedbackapp"  // Replace with your Docker Hub username/repository
+        DOCKER_REGISTRY = 'meghanamk24/feedbackapp'  // Replace with your Docker Hub username/repository
         DOCKER_CREDENTIALS = 'docker-hub-credentials'  // The Jenkins credential ID you created for Docker Hub
     }
 
@@ -60,8 +60,8 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    // Run the container
-                    bat "docker run ${DOCKER_REGISTRY}:latest"
+                    // Run the container (e.g., map ports if necessary or run in detached mode)
+                    bat "docker run -d -p 8000:8000 ${DOCKER_REGISTRY}:latest"
                 }
             }
         }
@@ -71,8 +71,8 @@ pipeline {
             steps {
                 script {
                     // Tag and push the image to Docker Hub
-                    bat "docker tag ${DOCKER_REGISTRY}:latest meghanamk24/feedbackapp:latest"
-                    bat "docker push meghanamk24/feedbackapp:latest"
+                    bat "docker tag ${DOCKER_REGISTRY}:latest ${DOCKER_REGISTRY}:latest"
+                    bat "docker push ${DOCKER_REGISTRY}:latest"
                 }
             }
         }
