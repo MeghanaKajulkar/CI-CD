@@ -18,8 +18,8 @@ pipeline {
             steps {
                 echo 'Installing Python dependencies...'
                 bat 'pip uninstall werkzeug -y'  // Uninstall werkzeug
+                bat 'pip install werkzeug==2.3.3'  // Install a specific version of werkzeug
                 bat 'pip install -r requirements.txt'  // Reinstall dependencies
-            }
         }
 
         stage('Run Tests') {
