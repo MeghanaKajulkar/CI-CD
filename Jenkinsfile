@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_REGISTRY = 'meghanamk24/feedbackapp'  // Replace with your Docker Hub username/repository
         DOCKER_CREDENTIALS = 'docker-hub-credentials'  // The Jenkins credential ID you created for Docker Hub
+        DEPLOYMENT_FILE = 'deployment.yaml'
     }
 
     stages {
