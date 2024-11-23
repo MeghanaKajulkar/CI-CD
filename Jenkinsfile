@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        DOCKER_REGISTRY = "yourdockerhubusername/myapp"  // Replace with your Docker Hub username/repository
-        DOCKER_CREDENTIALS = 'dockerhub-credentials'  // Jenkins credentials ID for Docker Hub (set up in Jenkins)
+        DOCKER_REGISTRY = "meghanamk24/feedbackapp"  // Replace with your Docker Hub username/repository
+        DOCKER_CREDENTIALS = 'docker-hub-credentials'  // The Jenkins credential ID you created for Docker Hub
     }
     stages {
         // Checkout code from SCM
