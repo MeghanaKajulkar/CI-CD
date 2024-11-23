@@ -20,7 +20,8 @@ pipeline {
                 bat 'pip uninstall werkzeug -y'  // Uninstall werkzeug
                 bat 'pip install werkzeug==2.3.3'  // Install a specific version of werkzeug
                 bat 'pip install -r requirements.txt'  // Reinstall dependencies
-        }
+            } // Closing the steps block here
+        } // Closing the Install Dependencies stage here
 
         stage('Run Tests') {
             steps {
