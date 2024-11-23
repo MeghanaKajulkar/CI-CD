@@ -50,7 +50,7 @@ pipeline {
                 echo 'Pushing Docker image to Docker registry...'
                 withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                     bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"  // Login to Docker registry using Jenkins credentials
-                    bat 'docker push ${DOCKER_REGISTRY}.toLowerCase()}:latest'  // Push the Docker image to the registry
+                    bat 'docker push ${registry}:latest'  // Push the Docker image to the registry
                 }
             }
         }
