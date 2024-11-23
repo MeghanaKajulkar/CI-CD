@@ -1,25 +1,45 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, render_template, request, redirect, jsonify
+import json
+import os
 
-# Initialize Flask app
 app = Flask(__name__)
 
-# Store feedback in memory (temporary)
-feedbacks = []
+# Path to store feedback
+FEEDBACK_FILE = os.path.join('data', 'feedback.json')
+
+# Load feedback from file
+def load_feedback():
+    if os.path.exists(FEEDBACK_FILE):
+        with open(FEEDBACK_FILE, 'r') as f:
+            return json.load(f)
+    return []
+
+# Save feedback to file
+def save_feedback(feedback):
+    with open(FEEDBACK_FILE, 'w') as f:
+        json.dump(feedback, f, indent=4)
 
 @app.route('/')
-def home():
-    """Render the homepage with feedbacks."""
-    return render_template('index.html', feedbacks=feedbacks)
+def index():
+    feedback = load_feedback()
+    return render_template('index.html', feedback=feedback)
 
 @app.route('/add_feedback', methods=['POST'])
 def add_feedback():
-    """API to handle adding feedback."""
-    data = request.json
-    feedback = data.get('feedback', '').strip()
-    if not feedback:
-        return jsonify({'error': 'Feedback cannot be empty'}), 400
-    feedbacks.append(feedback)
-    return jsonify({'message': 'Feedback added successfully', 'feedbacks': feedbacks})
+    feedback = load_feedback()
+    new_feedback = {
+        "name": request.form['name'],
+        "message": request.form['message']
+    }
+    feedback.append(new_feedback)
+    save_feedback(feedback)
+    return redirect('/')
+
+@app.route('/api/feedback', methods=['GET'])
+def get_feedback():
+    feedback = load_feedback()
+    return jsonify(feedback)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
+
