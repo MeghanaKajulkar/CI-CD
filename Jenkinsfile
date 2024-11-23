@@ -37,7 +37,7 @@ pipeline {
             }
             steps {
                 echo 'Building Docker image...'
-                bat 'docker build -t ${DOCKER_REGISTRY}:latest .'  // Build Docker image with the tag
+                bat 'docker build -t %DOCKER_REGISTRY%:latest .'  // Build Docker image with the tag
             }
         }
 
