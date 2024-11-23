@@ -61,7 +61,7 @@ pipeline {
             steps {
                 script {
                     // Run the container (e.g., map ports if necessary or run in detached mode)
-                    bat "docker run -d -p 8000:8000 ${DOCKER_REGISTRY}:latest"
+                    bat "docker run -d -p 8082:8000 ${DOCKER_REGISTRY}:latest"
                 }
             }
         }
