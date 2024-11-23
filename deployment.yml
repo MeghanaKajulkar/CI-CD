@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feedback-app-deployment
+  namespace: dev  # Change this to prod or staging if required
+  labels:
+    app: feedback-app
+spec:
+  replicas: 3  # Number of pods to create
+  selector:
+    matchLabels:
+      app: feedback-app
+  template:
+    metadata:
+      labels:
+        app: feedback-app
+    spec:
+      containers:
+      - name: feedback-app-container
+        image: meghanamk24/feedbackapp:latest  # Replace with your Docker image
+        ports:
+        - containerPort: 8000  # Application's port
+        env:
+        - name: ENVIRONMENT
+          value: "development"  # Change to "production" or "staging" if required
