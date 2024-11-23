@@ -1,9 +1,11 @@
 pipeline {
     agent any
+
     environment {
         DOCKER_REGISTRY = "meghanamk24/feedbackapp"  // Replace with your Docker Hub username/repository
         DOCKER_CREDENTIALS = 'docker-hub-credentials'  // The Jenkins credential ID you created for Docker Hub
     }
+
     stages {
         // Checkout code from SCM
         stage('Checkout SCM') {
@@ -30,27 +32,47 @@ pipeline {
             }
         }
 
-        // Build Docker image
-        stage('Build Docker Image') {
-            when {
-                expression { return currentBuild.result == null || currentBuild.result == 'SUCCESS' }
-            }
+        // Login to Docker Hub
+        stage('Login to Docker Hub') {
             steps {
-                echo 'Building Docker image...'
-                bat 'docker build -t %DOCKER_REGISTRY%:latest .'  // Build Docker image with the tag
+                script {
+                    // Securely login to Docker Hub using Jenkins credentials
+                    withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", 
+                                                        usernameVariable: 'DOCKER_USER', 
+                                                        passwordVariable: 'DOCKER_PASS')]) {
+                        bat "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
+                    }
+                }
             }
         }
 
-        // Push Docker image to Docker registry
-        stage('Push Docker Image') {
-            when {
-                expression { return currentBuild.result == null || currentBuild.result == 'SUCCESS' }
-            }
+        // Build Docker Image
+        stage('Build Docker Image') {
             steps {
-                echo 'Pushing Docker image to Docker registry...'
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-                    bat "docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD}"  // Login to Docker registry using Jenkins credentials
-                    bat 'docker push ${registry}:latest'  // Push the Docker image to the registry
+                script {
+                    // Build the Docker image
+                    bat "docker build -t ${DOCKER_REGISTRY}:latest ."
+                }
+            }
+        }
+
+        // Run Docker Container
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    // Run the container
+                    bat "docker run ${DOCKER_REGISTRY}:latest"
+                }
+            }
+        }
+
+        // Push Docker Image
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Tag and push the image to Docker Hub
+                    bat "docker tag ${DOCKER_REGISTRY}:latest meghanamk24/feedbackapp:latest"
+                    bat "docker push meghanamk24/feedbackapp:latest"
                 }
             }
         }
