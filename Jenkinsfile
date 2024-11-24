@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_REGISTRY = 'meghanamk24/feedbackapp' // Replace with your Docker Hub username/repository
-        DOCKER_CREDENTIALS = 'docker-hub-credentials' // Jenkins credential ID for Docker Hub
+        DOCKER_REGISTRY = 'meghanamk24/feedbackapp'  // Replace with your Docker Hub username/repository
+        DOCKER_CREDENTIALS = 'docker-hub-credentials'  // Jenkins credential ID for Docker Hub
         DEPLOYMENT_FILE = 'deployment.yaml'
-        APP_PORT = '' // Dynamically allocated port placeholder
+        APP_PORT = ''  // Dynamically allocated port placeholder
     }
 
     stages {
@@ -32,7 +32,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo 'Running tests...'
-                bat 'python -m unittest discover -s tests' // Update this command for pytest if necessary
+                bat 'python -m unittest discover -s tests'  // Update this command for pytest if necessary
             }
         }
 
@@ -84,6 +84,7 @@ pipeline {
         // Run Docker Container with Dynamic Port
         stage('Run Docker Container') {
             steps {
+                echo "Running Docker container on port ${env.APP_PORT}..."
                 bat "docker run -d -p ${env.APP_PORT}:8000 ${DOCKER_REGISTRY}:latest"
             }
         }
@@ -91,10 +92,8 @@ pipeline {
         // Push Docker Image to Registry
         stage('Push Docker Image') {
             steps {
-                bat """
-                    docker tag ${DOCKER_REGISTRY}:latest ${DOCKER_REGISTRY}:latest
-                    docker push ${DOCKER_REGISTRY}:latest
-                """
+                echo "Pushing Docker image to registry..."
+                bat "docker push ${DOCKER_REGISTRY}:latest"
             }
         }
 
@@ -120,6 +119,7 @@ pipeline {
         stage('Cleanup Old Containers') {
             steps {
                 script {
+                    echo 'Cleaning up old Docker containers...'
                     bat """
                         docker ps -a -q --filter "name=feedbackapp" | ForEach-Object { docker stop $_; docker rm $_ }
                     """
