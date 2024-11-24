@@ -62,6 +62,9 @@ pipeline {
         stage('Find Available Port') {
             steps {
                 script {
+                    // Initialize usedPorts as an empty array before use
+                    def usedPorts = []
+
                     def port = powershell(returnStdout: true, script: """
                         $usedPorts = Get-NetTCPConnection -State Listen | Select-Object -ExpandProperty LocalPort
                         $availablePorts = (8000..9000) | Where-Object { $_ -notin $usedPorts }
