@@ -64,9 +64,17 @@ pipeline {
                 script {
                     def port = powershell(returnStdout: true, script: """
                         $usedPorts = Get-NetTCPConnection -State Listen | Select-Object -ExpandProperty LocalPort
-                        $availablePorts = (8000..9000) | Where-Object { $_ -notin $usedPorts }
-                        $availablePorts[0]
+                        $availablePorts = (8000..9000) | Where-Object { \$usedPorts -notcontains \$_ }
+                        if (\$availablePorts.Count -gt 0) {
+                            return \$availablePorts[0]
+                        } else {
+                            return 'No available ports'
+                        }
                     """).trim()
+
+                    if (port == 'No available ports') {
+                        error 'No available port found in the range 8000-9000'
+                    }
                     env.APP_PORT = port
                     echo "Found available port: ${env.APP_PORT}"
                 }
@@ -76,6 +84,7 @@ pipeline {
         // Run Docker Container with Dynamic Port
         stage('Run Docker Container') {
             steps {
+                echo "Running Docker container on port ${env.APP_PORT}..."
                 bat "docker run -d -p ${env.APP_PORT}:8000 ${DOCKER_REGISTRY}:latest"
             }
         }
