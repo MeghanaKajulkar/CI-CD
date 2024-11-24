@@ -68,13 +68,16 @@ pipeline {
                     // Check if port is available using a simple shell script
                     while (!isPortAvailable) {
                         def result = bat(script: "netstat -an | findstr ':${randomPort}'", returnStatus: true)
+                        echo "Checking port: ${randomPort} (result: ${result})"
                         if (result != 0) {
                             isPortAvailable = true
                         } else {
                             randomPort = 8000 + (Math.random() * 1000).toInteger()  // Regenerate if port is already in use
+                            echo "Port ${randomPort} is in use, trying again..."
                         }
                     }
 
+                    // Ensure the port is assigned to APP_PORT
                     env.APP_PORT = randomPort
                     echo "Found available port: ${env.APP_PORT}"
                 }
