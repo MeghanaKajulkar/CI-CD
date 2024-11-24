@@ -62,15 +62,20 @@ pipeline {
         stage('Find Available Port') {
             steps {
                 script {
-                    // Initialize usedPorts as an empty array before use
-                    def usedPorts = []
+                    def randomPort = 8000 + (Math.random() * 1000).toInteger()  // Generate random port between 8000 and 9000
+                    def isPortAvailable = false
 
-                    def port = powershell(returnStdout: true, script: """
-                        $usedPorts = Get-NetTCPConnection -State Listen | Select-Object -ExpandProperty LocalPort
-                        $availablePorts = (8000..9000) | Where-Object { $_ -notin $usedPorts }
-                        $availablePorts[0]
-                    """).trim()
-                    env.APP_PORT = port
+                    // Check if port is available using a simple shell script
+                    while (!isPortAvailable) {
+                        def result = bat(script: "netstat -an | findstr ':${randomPort}'", returnStatus: true)
+                        if (result != 0) {
+                            isPortAvailable = true
+                        } else {
+                            randomPort = 8000 + (Math.random() * 1000).toInteger()  // Regenerate if port is already in use
+                        }
+                    }
+
+                    env.APP_PORT = randomPort
                     echo "Found available port: ${env.APP_PORT}"
                 }
             }
