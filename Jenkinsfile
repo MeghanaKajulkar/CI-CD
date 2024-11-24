@@ -5,6 +5,7 @@ pipeline {
         DOCKER_REGISTRY = 'meghanamk24/feedbackapp'  // Replace with your Docker Hub username/repository
         DOCKER_CREDENTIALS = 'docker-hub-credentials'  // Jenkins credential ID for Docker Hub
         DEPLOYMENT_FILE = 'deployment.yaml'  // Path to your Kubernetes deployment file
+        K8S_KUBE_CONFIG = credentials('kubernestis_access')  // The Kubernetes config file you added as a secret in Jenkins
     }
 
     stages {
@@ -70,6 +71,12 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying to Kubernetes...'
+                    
+                    // Create a temporary kubeconfig file from the secret file
+                    writeFile(file: 'kubeconfig', text: K8S_KUBE_CONFIG)
+
+                    // Set KUBECONFIG environment variable to the temporary kubeconfig file
+                    bat "set KUBECONFIG=kubeconfig"
                     
                     // Apply the Kubernetes deployment file
                     bat "kubectl apply -f ${DEPLOYMENT_FILE}"
